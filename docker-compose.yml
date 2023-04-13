@@ -5,7 +5,8 @@ services:
     restart: always
     container_name: firefly_mysql
     volumes:
-      - ../volumes/data/mysqldata:/var/lib/mysql
+      - /mydata/mysql/data:/var/lib/mysql
+      - /mydata/mysql/log:/var/log/mysql
       - ./config/my.cnf:/etc/mysql/conf.d/my.cnf
       #      数据库还原目录 可将需要还原的sql文件放在这里
       - ./init/mysql:/docker-entrypoint-initdb.d
