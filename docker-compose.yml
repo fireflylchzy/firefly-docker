@@ -1,18 +1,41 @@
-version: '1'
+version: '3'
 services: 
-  mysql:
-    image: mysql:8.0.32
-    restart: always
-    container_name: firefly_mysql
+  nacos:
+    image: nacos/nacos-server:v2.2.2
+    container_name: nacos-standalone-mysql
+    env_file:
+      - ./env/nacos-standlone-mysql.env
     volumes:
-      - /mydata/mysql/data:/var/lib/mysql
-      - /mydata/mysql/log:/var/log/mysql
+      - /data/nacos/logs/:/home/nacos/logs
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: always
+  mysql:
+    container_name: firefly_mysql
+    image: mysql:8.0.31
+    restart: always
+    #environment:
+    #  - "MYSQL_ROOT_PASSWORD=123456"
+    #  - "MYSQL_DATABASE=firefly"
+    #  - "TZ=Asia/Shanghai"
+    env_file:
+      - ./env/mysql.env
+    volumes:
+      - /data/mysql/data:/var/lib/mysql
+      - /data/mysql/log:/var/log/mysql
       - ./config/my.cnf:/etc/mysql/conf.d/my.cnf
       #      数据库还原目录 可将需要还原的sql文件放在这里
       - ./init/mysql:/docker-entrypoint-initdb.d
-    environment:
-      - "MYSQL_ROOT_PASSWORD=123456"
-      - "MYSQL_DATABASE=firefly"
-      - "TZ=Asia/Shanghai"
     ports:
       - 3306:3306
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+    
