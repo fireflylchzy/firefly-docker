@@ -1,0 +1,38 @@
+version: '3'
+services:
+  yapi-mongo:
+    image: mongo:latest
+    # 容器名称
+    container_name: standalone-mongo
+    env_file:
+      - ./env/yapi-mongo.env
+    #挂载 宿主机路径:容器路劲
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /data/yapi/mongo/data:/data/db
+      - /data/yapi/mongo/log:/var/log/mongodb
+      - ./init/mongo:/docker-entrypoint-initdb.d
+    # environment:
+    #   MONGO_INITDB_DATABASE: yapi
+    #   #MongoDB账户
+    #   MONGO_INITDB_ROOT_USERNAME: anoyi
+    #   #MongoDB密码
+    #   MONGO_INITDB_ROOT_PASSWORD: anoyi.com
+    ports:
+      - 27017:27017
+    expose:
+      - 27017 
+  yapi:
+    image: registry.cn-hangzhou.aliyuncs.com/anoyi/yapi
+    # 容器名称
+    container_name: standalone-yapi
+    env_file:
+      - ./env/yapi.env
+    volumes:
+      - /data/yapi/log/yapi.log:/tmp/yapi.log
+      - ./config/yapi/config.json:/api/config.json
+    ports:
+      - 3000:3000
+    depends_on:
+      - yapi-mongo
+    restart: always
