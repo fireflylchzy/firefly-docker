@@ -23,7 +23,7 @@ services:
     expose:
       - 27017 
   yapi:
-    image: registry.cn-hangzhou.aliyuncs.com/anoyi/yapi
+    image: jayfong/yapi:1.9.1
     # 容器名称
     container_name: standalone-yapi
     env_file:
