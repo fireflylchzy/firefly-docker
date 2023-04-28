@@ -4,10 +4,6 @@ services:
     container_name: mysql
     image: mysql:8.0.31
     restart: always
-    #environment:
-    #  - "MYSQL_ROOT_PASSWORD=123456"
-    #  - "MYSQL_DATABASE=firefly"
-    #  - "TZ=Asia/Shanghai"
     env_file:
       - ./env/mysql.env
     volumes:
@@ -36,4 +32,34 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+    restart: always
+  yapi-mongo:
+    image: mongo:latest
+    # 容器名称
+    container_name: standalone-mongo
+    env_file:
+      - ./env/yapi-mongo.env
+    #挂载 宿主机路径:容器路劲
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - /data/yapi/mongo/data:/data/db
+      - /data/yapi/mongo/log:/var/log/mongodb
+      - ./init/mongo:/docker-entrypoint-initdb.d
+    ports:
+      - 27017:27017
+    expose:
+      - 27017 
+  yapi:
+    image: jayfong/yapi:1.9.1
+    # 容器名称
+    container_name: standalone-yapi
+    env_file:
+      - ./env/yapi.env
+    volumes:
+      - /data/yapi/log/yapi.log:/tmp/yapi.log
+      - ./config/yapi/config.json:/api/config.json
+    ports:
+      - 3000:3000
+    depends_on:
+      - yapi-mongo
     restart: always
